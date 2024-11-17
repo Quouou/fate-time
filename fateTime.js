@@ -51,7 +51,7 @@ client.once("ready", async () => {
     } catch (error) {
       console.error("Error fetching tweets:", error);
     }
-  }, 60000); // Check every 60 seconds
+  }, 3600000);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
