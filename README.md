@@ -19,6 +19,7 @@ This is also my first time creating a discord bot :D
   - `!ping`: Check the bot's responsiveness.
   - `!server-time`: Get the FGO server time.
 - Displays a dynamic status: `/server-time | /help`.
+- Fetches tweets from official fgo page then posts on a discord channel.
 
 ---
 
