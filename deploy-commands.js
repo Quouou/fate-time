@@ -19,6 +19,10 @@ const commands = [
     name: "help",
     description: "Get a list of available commands.",
   },
+  {
+    name: "test-fetch",
+    description: "Simulate fetching a tweet for testing purposes.",
+  },
 ];
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
