@@ -5,8 +5,11 @@
 ## Overview
 
 Fate Time is a custom Discord bot designed to provide the server time for the Fate/Grand Order NA server.  
-It supports both slash commands and text-based commands for utilities like server time and bot status.
-This is also my first time creating a discord bot :D
+It supports both slash commands for utilities like server time and bot status (planning on adding more features).
+Fetching of tweets
+
+
+This is also  my first time creating a discord bot :D
 
 ---
 
