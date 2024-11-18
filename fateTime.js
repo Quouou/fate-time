@@ -36,9 +36,8 @@ client.once("ready", async () => {
         // Get the latest tweet
         const latestTweet = userTweets.data[0];
 
-        // Check if it's a new tweet
-        if (lastTweetId !== latestTweet.id) {
-          // Temporarily bypass lastTweetId check
+        if (true || lastTweetId !== latestTweet.id) {
+          // Temporary bypass for testing
           lastTweetId = latestTweet.id;
           const channel = await client.channels.fetch(CHANNEL_ID);
           if (channel && channel.isTextBased()) {
