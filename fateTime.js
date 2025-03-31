@@ -41,14 +41,21 @@ async function getServantDetails(id, region) {
   }
 }
 
+// Function to get future banners for a servant
 async function getServantBanners(id, region) {
   try {
     // Convert region to lowercase for raw API
     const regionLower = region.toLowerCase();
     
-    // 1. First get all active/upcoming gachas
+    // 1. First get all active/upcoming gachas - FIXED URL FORMAT
     const listResponse = await axios.get(`https://api.atlasacademy.io/raw/${regionLower}/gacha/list`);
     console.log(`Got ${listResponse.data.length} gachas from ${region} server`);
+    
+    // Debugging for errors
+    if (!Array.isArray(listResponse.data)) {
+      console.error(`Unexpected response format for gacha list:`, listResponse.data);
+      return [];
+    }
     
     // Filter for active/future banners
     const now = DateTime.now();
@@ -65,11 +72,17 @@ async function getServantBanners(id, region) {
     const banners = [];
     for (const gachaId of futureGachaIds) {
       try {
+        // FIXED: Ensure gachaId is valid
+        if (!gachaId) {
+          console.log(`Skipping invalid gachaId: ${gachaId}`);
+          continue;
+        }
+        
         const gachaDetail = await axios.get(`https://api.atlasacademy.io/raw/${regionLower}/gacha/${gachaId}`);
         
         // Check if this gacha has our servant
         const hasServant = gachaDetail.data.rateups?.some(rateup => 
-          rateup.objects.some(obj => obj.id === parseInt(id) && obj.type === "servant")
+          rateup.objects?.some(obj => obj.id === parseInt(id) && obj.type === "servant")
         );
         
         if (hasServant) {
@@ -78,7 +91,6 @@ async function getServantBanners(id, region) {
             title: gachaDetail.data.name,
             startDate: DateTime.fromMillis(gachaDetail.data.start * 1000).toISO(),
             endDate: DateTime.fromMillis(gachaDetail.data.end * 1000).toISO(),
-            // You could extract more details from gachaDetail.data if needed
           });
         }
       } catch (error) {
@@ -89,7 +101,12 @@ async function getServantBanners(id, region) {
     console.log(`Found ${banners.length} banners with servant ID ${id}`);
     return banners;
   } catch (error) {
-    console.error(`Error getting servant banners in ${region}:`, error);
+    // More detailed error logging
+    console.error(`Error getting servant banners in ${region}:`, error.message);
+    if (error.response) {
+      console.error(`Status: ${error.response.status}`);
+      console.error(`Response data:`, error.response.data);
+    }
     return [];
   }
 }
