@@ -45,14 +45,27 @@ async function getServantDetails(id, region) {
 async function getServantBanners(id, region) {
   try {
     const baseUrl = region === 'NA' ? NA_API_BASE : JP_API_BASE;
-    // Fix: Change 'servant' to 'svt' in the endpoint path
-    const response = await axios.get(`${baseUrl}/svt/${id}/summons`);
     
-    // Filter to only include future banners
+    // Get all summons (rate ups)
+    // Uses a future timestamp to get all upcoming banners
+    const response = await axios.get(`${baseUrl}/summon?includeClosedSummons=false`);
+    
+    // Filter to only include banners with our servant
     const now = DateTime.now();
     const futureBanners = response.data.filter(banner => {
+      // Check if banner is in the future
       const endDate = DateTime.fromISO(banner.endDate);
-      return endDate > now;
+      if (endDate <= now) return false;
+      
+      // Check if the banner has our servant
+      let hasServant = false;
+      
+      // Check all rate up servants
+      if (banner.rateUpServants) {
+        hasServant = banner.rateUpServants.some(servant => servant.id === parseInt(id));
+      }
+      
+      return hasServant;
     });
     
     return futureBanners;
