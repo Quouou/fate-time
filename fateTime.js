@@ -44,11 +44,11 @@ async function getServantDetails(id, region) {
 // Function to get future banners for a servant
 async function getServantBanners(id, region) {
   try {
-    // Convert region to lowercase for raw API
-    const regionLower = region.toLowerCase();
+    // Use region in uppercase - API is case sensitive
+    // Don't convert to lowercase as the error shows it must be uppercase
     
     // 1. First get all active/upcoming gachas - FIXED URL FORMAT
-    const listResponse = await axios.get(`https://api.atlasacademy.io/raw/${regionLower}/gacha/list`);
+    const listResponse = await axios.get(`https://api.atlasacademy.io/raw/${region}/gacha`);
     console.log(`Got ${listResponse.data.length} gachas from ${region} server`);
     
     // Debugging for errors
@@ -78,7 +78,7 @@ async function getServantBanners(id, region) {
           continue;
         }
         
-        const gachaDetail = await axios.get(`https://api.atlasacademy.io/raw/${regionLower}/gacha/${gachaId}`);
+        const gachaDetail = await axios.get(`https://api.atlasacademy.io/raw/${region}/gacha/${gachaId}`);
         
         // Check if this gacha has our servant
         const hasServant = gachaDetail.data.rateups?.some(rateup => 
@@ -110,7 +110,6 @@ async function getServantBanners(id, region) {
     return [];
   }
 }
-
 // Update the InteractionCreate event handler
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isCommand()) return;
