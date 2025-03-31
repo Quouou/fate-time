@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "axios": "^1.6.0",
     "@discordjs/rest": "^2.4.0",
     "discord-api-types": "^0.37.105",
     "discord.js": "^14.16.3",
