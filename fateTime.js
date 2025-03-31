@@ -189,8 +189,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 
-// Automatically monitor tweets every minute
-setInterval(monitorTweets, 60000);
 
 client.once("ready", async () => {
   console.log(`${client.user.tag} is online and monitoring tweets!`);
