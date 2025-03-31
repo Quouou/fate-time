@@ -45,7 +45,8 @@ async function getServantDetails(id, region) {
 async function getServantBanners(id, region) {
   try {
     const baseUrl = region === 'NA' ? NA_API_BASE : JP_API_BASE;
-    const response = await axios.get(`${baseUrl}/servant/${id}/summons`);
+    // Fix: Change 'servant' to 'svt' in the endpoint path
+    const response = await axios.get(`${baseUrl}/svt/${id}/summons`);
     
     // Filter to only include future banners
     const now = DateTime.now();
