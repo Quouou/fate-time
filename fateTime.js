@@ -41,34 +41,53 @@ async function getServantDetails(id, region) {
   }
 }
 
-// Function to get future banners for a servant
 async function getServantBanners(id, region) {
   try {
-    const baseUrl = region === 'NA' ? NA_API_BASE : JP_API_BASE;
+    // Convert region to lowercase for raw API
+    const regionLower = region.toLowerCase();
     
-    // Get all summons (rate ups)
-    // Uses a future timestamp to get all upcoming banners
-    const response = await axios.get(`${baseUrl}/summon?includeClosedSummons=false`);
+    // 1. First get all active/upcoming gachas
+    const listResponse = await axios.get(`https://api.atlasacademy.io/raw/${regionLower}/gacha/list`);
+    console.log(`Got ${listResponse.data.length} gachas from ${region} server`);
     
-    // Filter to only include banners with our servant
+    // Filter for active/future banners
     const now = DateTime.now();
-    const futureBanners = response.data.filter(banner => {
-      // Check if banner is in the future
-      const endDate = DateTime.fromISO(banner.endDate);
-      if (endDate <= now) return false;
-      
-      // Check if the banner has our servant
-      let hasServant = false;
-      
-      // Check all rate up servants
-      if (banner.rateUpServants) {
-        hasServant = banner.rateUpServants.some(servant => servant.id === parseInt(id));
-      }
-      
-      return hasServant;
-    });
+    const futureGachaIds = listResponse.data
+      .filter(gacha => {
+        const endTime = DateTime.fromMillis(gacha.end * 1000); // Unix timestamp to DateTime
+        return endTime > now;
+      })
+      .map(gacha => gacha.id);
     
-    return futureBanners;
+    console.log(`Found ${futureGachaIds.length} future gachas`);
+    
+    // 2. Check each gacha to see if it contains our servant
+    const banners = [];
+    for (const gachaId of futureGachaIds) {
+      try {
+        const gachaDetail = await axios.get(`https://api.atlasacademy.io/raw/${regionLower}/gacha/${gachaId}`);
+        
+        // Check if this gacha has our servant
+        const hasServant = gachaDetail.data.rateups?.some(rateup => 
+          rateup.objects.some(obj => obj.id === parseInt(id) && obj.type === "servant")
+        );
+        
+        if (hasServant) {
+          banners.push({
+            id: gachaId,
+            title: gachaDetail.data.name,
+            startDate: DateTime.fromMillis(gachaDetail.data.start * 1000).toISO(),
+            endDate: DateTime.fromMillis(gachaDetail.data.end * 1000).toISO(),
+            // You could extract more details from gachaDetail.data if needed
+          });
+        }
+      } catch (error) {
+        console.error(`Error getting details for gacha ${gachaId}:`, error.message);
+      }
+    }
+    
+    console.log(`Found ${banners.length} banners with servant ID ${id}`);
+    return banners;
   } catch (error) {
     console.error(`Error getting servant banners in ${region}:`, error);
     return [];
